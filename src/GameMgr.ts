@@ -1,7 +1,7 @@
 import { LinkedNode, RingLinkedList } from './LinkedList';
 import Player from './Player';
 import { Poker, initPokers } from './Poker';
-import { PutRecordAbstract, RecordType, compareRecord, getPutPokerRecord } from './Record';
+import { PutPokerRecord, PutRecordAbstract, RecordType, compareRecord, getPutPokerRecord } from './Record';
 import { chunk } from './utils';
 import { reactive } from 'vue';
 
@@ -254,14 +254,8 @@ class GameMgr {
     }
 
     if (!this.lastPutRecord || this.lastPutRecord.player.id === this.activePlayer.id) {
-      // 第一次出牌 && 最后记录出牌的人是我
-      this.activePlayer.putPokers(selected);
-      this.lastPutRecord = currPutRecord;
-      if (this.activePlayer.isWin()) {
-        this.restartGame();
-      } else {
-        this.next(this.activePlayer);
-      }
+      // 第一次出牌 && 最后记录出牌的人是我 可以直接出牌
+      this.confirmPutPokers(selected, currPutRecord);
       return;
     }
 
@@ -271,9 +265,18 @@ class GameMgr {
       return;
     }
 
+    this.confirmPutPokers(selected, currPutRecord);
+  }
+
+  // 确定出牌
+  private confirmPutPokers(selected: Poker[], putPokerRecord: PutPokerRecord) {
     this.activePlayer.putPokers(selected);
-    this.lastPutRecord = currPutRecord;
-    this.next(this.activePlayer);
+    this.lastPutRecord = putPokerRecord;
+    if (this.activePlayer.isWin()) {
+      this.restartGame();
+    } else {
+      this.next(this.activePlayer);
+    }
   }
 }
 
